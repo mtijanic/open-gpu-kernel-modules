@@ -732,7 +732,6 @@ serverAllocResource
     CLIENT_ENTRY       *pClientEntry = NULL;
     CLIENT_ENTRY       *pSecondClientEntry = NULL;
     NvHandle            hSecondClient;
-    CALL_CONTEXT        callContext = {0};
 
     if (!pServer->bConstructed)
         return NV_ERR_NOT_READY;
@@ -745,7 +744,10 @@ serverAllocResource
     status = serverAllocApiCopyIn(pServer, pParams, &pApiState);
     if (status != NV_OK)
         return status;
-
+    
+    RS_ALLOCATE_STRUCTURE(CALL_CONTEXT, pCallContext, return NV_ERR_NO_MEMORY);
+    portMemSet(pCallContext, 0, sizeof(*pCallContext));
+    
     status = serverAllocResourceLookupLockFlags(pServer, RS_LOCK_TOP, pParams, &topLockAccess);
     if (status != NV_OK)
         goto done;
@@ -756,7 +758,7 @@ serverAllocResource
     if (status == NV_OK)
     {
         NV_CHECK_OK_OR_GOTO(status, LEVEL_ERROR,
-            serverDeserializeAllocDown(&callContext, pParams->externalClassId, &pParams->pAllocParams, &pParams->paramsSize, &pParams->allocFlags),
+            serverDeserializeAllocDown(pCallContext, pParams->externalClassId, &pParams->pAllocParams, &pParams->paramsSize, &pParams->allocFlags),
             done);
 
         if (bClientAlloc)
@@ -851,14 +853,15 @@ done:
     }
 
     NV_CHECK_OK_OR_CAPTURE_FIRST_ERROR(status, LEVEL_ERROR,
-        serverSerializeAllocUp(&callContext, pParams->externalClassId, &pParams->pAllocParams, &pParams->paramsSize, &pParams->allocFlags));
-    serverFreeSerializeStructures(&callContext, pParams->pAllocParams);
+        serverSerializeAllocUp(pCallContext, pParams->externalClassId, &pParams->pAllocParams, &pParams->paramsSize, &pParams->allocFlags));
+    serverFreeSerializeStructures(pCallContext, pParams->pAllocParams);
 
     serverTopLock_Epilogue(pServer, topLockAccess, pLockInfo, &releaseFlags);
 
     // copyout as needed, being careful not to overwrite a useful status value
     status = serverAllocApiCopyOut(pServer, status, pApiState);
 
+    RS_FREE_STRUCTURE(pCallContext);
     NV_ASSERT(pLockInfo->state == initialLockState);
 
     return status;

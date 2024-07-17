@@ -651,7 +651,6 @@ _clientAllocResourceHelper
     RsResource     *pResource = NULL;
     RsResourceRef  *pParentRef = NULL;
     RsResourceRef  *pResourceRef = NULL;
-    CALL_CONTEXT    callContext;
     CALL_CONTEXT   *pOldContext = NULL;
     NvHandle        hParent = pParams->hParent;
 
@@ -659,28 +658,30 @@ _clientAllocResourceHelper
     if (status != NV_OK && hParent != pClient->hClient && hParent != 0)
         return status;
 
+    RS_ALLOCATE_STRUCTURE(CALL_CONTEXT, pCallContext, return NV_ERR_NO_MEMORY);
+
     status = _clientConstructResourceRef(pClient, pServer, pParentRef, hResource, pParams->externalClassId, &pResourceRef);
     if (status != NV_OK)
         goto fail;
 
-    portMemSet(&callContext, 0, sizeof(callContext));
-    callContext.pServer = pServer;
-    callContext.pClient = pClient;
-    callContext.pResourceRef = pResourceRef;
-    callContext.pContextRef = pParams->pSrcRef;
-    callContext.pLockInfo = pParams->pLockInfo;
+    portMemSet(pCallContext, 0, sizeof(*pCallContext));
+    pCallContext->pServer = pServer;
+    pCallContext->pClient = pClient;
+    pCallContext->pResourceRef = pResourceRef;
+    pCallContext->pContextRef = pParams->pSrcRef;
+    pCallContext->pLockInfo = pParams->pLockInfo;
 
     if (pParams->pSecInfo == NULL)
     {
         status = NV_ERR_INVALID_ARGUMENT;
         goto fail;
     }
-    callContext.secInfo = *pParams->pSecInfo;
+    pCallContext->secInfo = *pParams->pSecInfo;
 
     NV_ASSERT_OK_OR_GOTO(status,
-        resservSwapTlsCallContext(&pOldContext, &callContext), fail);
+        resservSwapTlsCallContext(&pOldContext, pCallContext), fail);
 
-    status = resservResourceFactory(pServer->pAllocator, &callContext, pParams, &pResource);
+    status = resservResourceFactory(pServer->pAllocator, pCallContext, pParams, &pResource);
     NV_ASSERT_OK(resservRestoreTlsCallContext(pOldContext));
 
     if (status != NV_OK)
@@ -720,7 +721,7 @@ _clientAllocResourceHelper
 
     if (pServer->bRsAccessEnabled)
     {
-        status = rsAccessGrantRights(pResourceRef, &callContext, pClient,
+        status = rsAccessGrantRights(pResourceRef, pCallContext, pClient,
                                      pParams->pRightsRequested,
                                      pParams->pRightsRequired,
                                      pParams->pAllocParams);
@@ -730,6 +731,7 @@ _clientAllocResourceHelper
 
     *phResource = hResource;
 
+    RS_FREE_STRUCTURE(pCallContext);
     return NV_OK;
 
 fail:
@@ -744,17 +746,17 @@ fail:
         _refRemoveAllDependencies(pResourceRef);
 
         portMemSet(&params, 0, sizeof(params));
-        portMemSet(&callContext, 0, sizeof(callContext));
-        callContext.pServer = pServer;
-        callContext.pClient = pClient;
-        callContext.secInfo = *pParams->pSecInfo;
-        callContext.pResourceRef = pResourceRef;
-        callContext.pLockInfo = pParams->pLockInfo;
+        portMemSet(pCallContext, 0, sizeof(*pCallContext));
+        pCallContext->pServer = pServer;
+        pCallContext->pClient = pClient;
+        pCallContext->secInfo = *pParams->pSecInfo;
+        pCallContext->pResourceRef = pResourceRef;
+        pCallContext->pLockInfo = pParams->pLockInfo;
 
-        callContextStatus = resservSwapTlsCallContext(&pOldContext, &callContext);
+        callContextStatus = resservSwapTlsCallContext(&pOldContext, pCallContext);
         if (callContextStatus == NV_OK)
         {
-            resSetFreeParams(pResource, &callContext, &params);
+            resSetFreeParams(pResource, pCallContext, &params);
 
             objDelete(pResource);
             NV_ASSERT_OK(resservRestoreTlsCallContext(pOldContext));
@@ -777,6 +779,7 @@ fail:
         clientDestructResourceRef(pClient, pServer, pResourceRef);
     }
 
+    RS_FREE_STRUCTURE(pCallContext);
     return status;
 }
 

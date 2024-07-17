@@ -1177,7 +1177,6 @@ _memUtilsAllocateChannel
     OBJCHANNEL    *pChannel
 )
 {
-    NV_CHANNEL_ALLOC_PARAMS channelGPFIFOAllocParams;
     NV_STATUS               rmStatus =  NV_OK;
     NvU32                   hClass;
     RM_API                 *pRmApi = rmapiGetInterface(RMAPI_GPU_LOCK_INTERNAL);
@@ -1194,14 +1193,16 @@ _memUtilsAllocateChannel
     {
         engineType = RM_ENGINE_TYPE_COPY(pChannel->ceId);
     }
-    portMemSet(&channelGPFIFOAllocParams, 0, sizeof(NV_CHANNEL_ALLOC_PARAMS));
-    channelGPFIFOAllocParams.hObjectError  = hObjectError;
-    channelGPFIFOAllocParams.hObjectBuffer = hObjectBuffer;
-    channelGPFIFOAllocParams.gpFifoOffset  = pChannel->pbGpuVA + pChannel->channelPbSize;
-    channelGPFIFOAllocParams.gpFifoEntries = pChannel->channelNumGpFifioEntries;
-    channelGPFIFOAllocParams.hContextShare = NV01_NULL_OBJECT;
-    channelGPFIFOAllocParams.flags         = flags;
-    channelGPFIFOAllocParams.hVASpace      = pChannel->hVASpaceId;
+
+    RS_ALLOCATE_STRUCTURE(NV_CHANNEL_ALLOC_PARAMS, pChannelGPFIFOAllocParams, return NV_ERR_NO_MEMORY);
+    portMemSet(pChannelGPFIFOAllocParams, 0, sizeof(NV_CHANNEL_ALLOC_PARAMS));
+    pChannelGPFIFOAllocParams->hObjectError  = hObjectError;
+    pChannelGPFIFOAllocParams->hObjectBuffer = hObjectBuffer;
+    pChannelGPFIFOAllocParams->gpFifoOffset  = pChannel->pbGpuVA + pChannel->channelPbSize;
+    pChannelGPFIFOAllocParams->gpFifoEntries = pChannel->channelNumGpFifioEntries;
+    pChannelGPFIFOAllocParams->hContextShare = NV01_NULL_OBJECT;
+    pChannelGPFIFOAllocParams->flags         = flags;
+    pChannelGPFIFOAllocParams->hVASpace      = pChannel->hVASpaceId;
 
     //
     // Use GPU instance local Id if MIG is enabled
@@ -1215,32 +1216,34 @@ _memUtilsAllocateChannel
         RsClient *pClient;
         Device *pDevice;
 
-        NV_ASSERT_OK_OR_RETURN(
-            serverGetClientUnderLock(&g_resServ, hClientId, &pClient));
-
-        NV_ASSERT_OK_OR_RETURN(
-            deviceGetByHandle(pClient, hDeviceId, &pDevice));
-
-        NV_ASSERT_OK_OR_RETURN(
-            kmigmgrGetInstanceRefFromDevice(pGpu, pKernelMIGManager, pDevice, &ref));
+        NV_ASSERT_OK_OR_GOTO(rmStatus,
+            serverGetClientUnderLock(&g_resServ, hClientId, &pClient),
+            free_params);
+        NV_ASSERT_OK_OR_GOTO(rmStatus,
+            deviceGetByHandle(pClient, hDeviceId, &pDevice), free_params);
+        NV_ASSERT_OK_OR_GOTO(rmStatus,
+            kmigmgrGetInstanceRefFromDevice(pGpu, pKernelMIGManager, pDevice, &ref),
+            free_params);
         // Clear the Compute instance portion, if present
         ref = kmigmgrMakeGIReference(ref.pKernelMIGGpuInstance);
-        NV_ASSERT_OK_OR_RETURN(
+        NV_ASSERT_OK_OR_GOTO(rmStatus,
             kmigmgrGetGlobalToLocalEngineType(pGpu, pKernelMIGManager, ref,
                                               engineType,
-                                              &localCe));
-        channelGPFIFOAllocParams.engineType = gpuGetNv2080EngineType(localCe);
+                                              &localCe),
+            free_params);
+        pChannelGPFIFOAllocParams->engineType = gpuGetNv2080EngineType(localCe);
     }
     else
     {
-        channelGPFIFOAllocParams.engineType = gpuGetNv2080EngineType(engineType);
+        pChannelGPFIFOAllocParams->engineType = gpuGetNv2080EngineType(engineType);
     }
 
     hClass = kfifoGetChannelClassId(pGpu, GPU_GET_KERNEL_FIFO(pGpu));
     if (!hClass)
     {
         NV_PRINTF(LEVEL_ERROR, "Unable to determine CE's channel class.\n");
-        return NV_ERR_GENERIC;
+        rmStatus = NV_ERR_GENERIC;
+        goto free_params;
     }
 
     rmGpuLocksRelease(GPUS_LOCK_FLAGS_NONE, NULL);
@@ -1254,15 +1257,15 @@ _memUtilsAllocateChannel
                                    hClientId,
                                    hDeviceId,
                                    pChannel),
-            cleanup);
+            reacquire_lock);
 
-        channelGPFIFOAllocParams.hUserdMemory[0] = pChannel->hUserD;
-        channelGPFIFOAllocParams.userdOffset[0] = 0;
+        pChannelGPFIFOAllocParams->hUserdMemory[0] = pChannel->hUserD;
+        pChannelGPFIFOAllocParams->userdOffset[0] = 0;
     }
 
     if (RMCFG_FEATURE_PLATFORM_GSP)
     {
-        channelGPFIFOAllocParams.internalFlags = DRF_DEF(_KERNELCHANNEL, _ALLOC_INTERNALFLAGS, _PRIVILEGE, _KERNEL) |
+        pChannelGPFIFOAllocParams->internalFlags = DRF_DEF(_KERNELCHANNEL, _ALLOC_INTERNALFLAGS, _PRIVILEGE, _KERNEL) |
                                                  DRF_DEF(_KERNELCHANNEL, _ALLOC_INTERNALFLAGS, _GSP_OWNED, _YES);
     }
 
@@ -1273,13 +1276,13 @@ _memUtilsAllocateChannel
                                 hDeviceId,
                                 hChannelId,
                                 hClass,
-                                &channelGPFIFOAllocParams,
-                                sizeof(channelGPFIFOAllocParams)));
-
-cleanup:
+                                pChannelGPFIFOAllocParams,
+                                sizeof(pChannelGPFIFOAllocParams)));
+reacquire_lock:
     NV_ASSERT_OK_OR_CAPTURE_FIRST_ERROR(rmStatus,
                                         rmGpuLocksAcquire(GPUS_LOCK_FLAGS_NONE, RM_LOCK_MODULES_MEM));
-
+free_params:
+    RS_FREE_STRUCTURE(pChannelGPFIFOAllocParams);
     return rmStatus;
 }
 
