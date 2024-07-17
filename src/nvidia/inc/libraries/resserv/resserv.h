@@ -392,6 +392,29 @@ struct ACCESS_CONTROL
 #define RS_RWLOCK_RELEASE_READ(lock, validator)    RS_RWLOCK_RELEASE_READ_EXT(lock, validator, NV_FALSE)
 #define RS_RWLOCK_RELEASE_WRITE(lock, validator)   RS_RWLOCK_RELEASE_WRITE_EXT(lock, validator, NV_FALSE)
 
+//
+// Resource server deals with some rather large structures that we don't always want to put on the stack.
+//
+
+// Heap alloc on Windows and OpenRM
+#if PORT_IS_KERNEL_BUILD && !defined(__use_altstack__) && !NVOS_IS_LIBOS
+#define RS_ALLOCATE_STRUCTURE(type, varname, onfail)          \
+    type* varname = portMemAllocNonPaged(sizeof(type));       \
+    do { if (varname == NULL) { onfail; } } while(0)
+#define RS_FREE_STRUCTURE(varname) portMemFree(varname)
+
+// Use alloca or similar if available
+#elif PORT_IS_FUNC_SUPPORTED(portMemExAllocStack)
+#define RS_ALLOCATE_STRUCTURE(type, varname, onfail)   \
+    type* varname = portMemExAllocStack(sizeof(type))
+#define RS_FREE_STRUCTURE(varname)
+
+#else
+#define RS_ALLOCATE_STRUCTURE(type, varname, onfail)  \
+    type varname ## _OBJ;                             \
+    type* varname = &varname ## _OBJ
+#define RS_FREE_STRUCTURE(varname)
+#endif
 
 #ifdef __cplusplus
 }
