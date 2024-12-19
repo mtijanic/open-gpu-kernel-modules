@@ -72,7 +72,15 @@ NvBool nvDbgBreakpointEnabled(void)
 
 #if NV_PRINTF_STRINGS_ALLOWED
 static PORT_SPINLOCK *_nv_dbg_lock = NULL;
-static char   _nv_dbg_string[MAX_ERROR_STRING];
+typedef char NV_DBG_STRING[MAX_ERROR_STRING];
+static NV_DBG_STRING _nv_dbg_string;
+
+#define NV_DBG_STRING_HISTORY_SIZE 1024
+struct _nv_dbg_string_hist_entry {
+    NvU32 sec, usec;
+    NV_DBG_STRING str;
+} _nv_dbg_string_history[NV_DBG_STRING_HISTORY_SIZE];
+static volatile NvU32 _nv_dbg_string_next;
 
 //
 // nvDbgInit - Allocate the printf spinlock
@@ -247,17 +255,39 @@ void nvDbg_vPrintf
     NvBool  force = NV_FALSE;
     NvU32 prefix = 0;
 
-    if (nvDbg_PrintMsg(filename, linenumber, function, debuglevel, printf_format, &force, &prefix))
+    NvBool bPrint = nvDbg_PrintMsg(filename, linenumber, function, debuglevel, printf_format, &force, &prefix);
+    portSyncSpinlockAcquire(_nv_dbg_lock);
+    _nvDbgPrepareString(filename, linenumber, function, printf_format, prefix, arglist);
+
+    struct _nv_dbg_string_hist_entry *e = &_nv_dbg_string_history[_nv_dbg_string_next];
+    osGetCurrentTime(&e->sec, &e->usec);
+    portStringCopy(&e->str[0], MAX_ERROR_STRING, _nv_dbg_string, MAX_ERROR_STRING);
+    _nv_dbg_string_next = (_nv_dbg_string_next+1) % NV_DBG_STRING_HISTORY_SIZE;
+
+    if (bPrint)
     {
-        portSyncSpinlockAcquire(_nv_dbg_lock);
-        _nvDbgPrepareString(filename, linenumber, function, printf_format, prefix, arglist);
 #if PORT_IS_FUNC_SUPPORTED(portDbgExPrintfLevel)
         portDbgExPrintfLevel(_nvDbgForceLevel(force, debuglevel),
                              "%.*s", MAX_ERROR_STRING, _nv_dbg_string);
 #else
         portDbgPrintString(_nv_dbg_string, MAX_ERROR_STRING);
 #endif
-        portSyncSpinlockRelease(_nv_dbg_lock);
+    }
+    portSyncSpinlockRelease(_nv_dbg_lock);
+}
+
+void dump_print_history(void) {
+    NvU32 sec, usec;
+    NvU32 next = _nv_dbg_string_next; // cache; still a race condition, but doesn't really matter.
+    osGetCurrentTime(&sec, &usec);
+    portDbgPrintf("NVRM-History: Current timestamp is %d.%d\n", sec, usec);
+    for (NvU32 i = 0; i < NV_DBG_STRING_HISTORY_SIZE; i++) {
+        NvU32 idx = (next + i) % NV_DBG_STRING_HISTORY_SIZE;
+        struct _nv_dbg_string_hist_entry *e = &_nv_dbg_string_history[idx];
+
+        if (e->str[0]) {
+            portDbgPrintf("NVRM-History: [%d.%d] %.*s", e->sec, e->usec, MAX_ERROR_STRING, e->str);
+        }
     }
 }
 

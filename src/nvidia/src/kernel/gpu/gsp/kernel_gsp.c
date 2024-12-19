@@ -1892,6 +1892,8 @@ _kgspLogXid119
 
     if (pRpc->timeoutCount == 1)
     {
+        extern void dump_print_history(void);
+        dump_print_history();
         NV_PRINTF(LEVEL_ERROR,
                   "********************************* GSP Timeout **********************************\n");
         NV_PRINTF(LEVEL_ERROR,
@@ -1921,6 +1923,11 @@ _kgspLogXid119
 
         NV_PRINTF(LEVEL_ERROR,
                   "********************************************************************************\n");
+        extern void nvlogDumpToKernelLog(NvBool bDumpUnchangedBuffersOnlyOnce);
+        nvlogDumpToKernelLog(NV_FALSE);
+
+        extern void dump_rusd(OBJGPU *pGpu);
+        dump_rusd(pGpu);
     }
 }
 

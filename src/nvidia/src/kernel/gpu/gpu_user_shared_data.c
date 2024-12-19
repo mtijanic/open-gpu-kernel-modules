@@ -367,3 +367,12 @@ gpushareddataCtrlCmdRequestDataPoll_IMPL
 
     return _gpushareddataRequestDataPoll(pData, pParams->polledDataMask);
 }
+
+void dump_rusd(OBJGPU *pGpu) {
+    NV00DE_SHARED_DATA *rusd = (NV00DE_SHARED_DATA *) pGpu->userSharedData.pMapBuffer;
+    if (rusd == NULL)
+        rusd = &pGpu->userSharedData.data;
+
+    NV_PRINTF(LEVEL_ERROR, "RUSD data dump:\n");
+    DBG_PRINTBUF(LEVEL_ERROR, rusd, sizeof(*rusd));
+}
