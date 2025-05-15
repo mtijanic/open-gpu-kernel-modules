@@ -29,8 +29,16 @@ all: modules
 # nv-kernel.o is the OS agnostic portion of nvidia.ko
 ###########################################################################
 
+nouveau/gsp-abi-checker.so: nouveau/gsp-abi-checker.cpp
+	g++ -I`gcc -print-file-name=plugin`/include -fPIC -shared -o $@ $<
+ifeq ($(NV_USE_GCC_PLUGIN),1)
+  GCC_PLUGIN=nouveau/gsp-abi-checker.so
+else
+  GCC_PLUGIN=
+endif
+
 .PHONY: $(nv_kernel_o)
-$(nv_kernel_o):
+$(nv_kernel_o): $(GCC_PLUGIN)
 	$(MAKE) -C src/nvidia
 
 $(nv_kernel_o_binary): $(nv_kernel_o)

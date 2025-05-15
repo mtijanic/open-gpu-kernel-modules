@@ -3,3 +3,4 @@
 *.o.cmd
 *.o.d
 _out/
+nouveau/gsp-abi-checker.so

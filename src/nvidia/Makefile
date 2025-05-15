@@ -191,6 +191,14 @@ CFLAGS += $(CONDITIONAL_CFLAGS)
 CC_ONLY_CFLAGS += --std=gnu11
 CXX_ONLY_CFLAGS += --std=gnu++11
 
+# GCC plugin for ABI checking
+ifeq ($(NV_USE_GCC_PLUGIN),1)
+  # Find the nouveau dir at root of the git repo
+  GCC_PLUGIN_DIR := ../../nouveau
+  CFLAGS += -fplugin=$(GCC_PLUGIN_DIR)/gsp-abi-checker.so
+  $(info "GCC_PLUGIN_DIR: $(GCC_PLUGIN_DIR)")
+endif
+
 OBJS = $(call BUILD_OBJECT_LIST,$(ALL_SRCS))
 
 # Define how to generate the NVIDIA ID string
