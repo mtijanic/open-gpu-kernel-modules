@@ -296,7 +296,7 @@ typedef struct NotifyOpSharedSurface
 /*!
  * Index into libosLogDecode array.
  */
-enum
+enum LOGIDX
 {
     LOGIDX_INIT,
     LOGIDX_INTR,

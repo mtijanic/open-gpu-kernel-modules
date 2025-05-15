@@ -26,14 +26,14 @@
 
 #include "nvtypes.h"
 
-typedef struct {
+typedef struct MESSAGE_QUEUE_INIT_ARGUMENTS {
     NvU64 sharedMemPhysAddr;
     NvU32 pageTableEntryCount;
     NvLength cmdQueueOffset;
     NvLength statQueueOffset;
 } MESSAGE_QUEUE_INIT_ARGUMENTS;
 
-typedef struct {
+typedef struct GSP_SR_INIT_ARGUMENTS {
     NvU32 oldLevel;
     NvU32 flags;
     NvBool bInPMTransition;
@@ -42,7 +42,7 @@ typedef struct {
 /*!
  * (Cached) GSP fw RM initialization arguments.
  */
-typedef struct
+typedef struct GSP_ARGUMENTS_CACHED
 {
     MESSAGE_QUEUE_INIT_ARGUMENTS      messageQueueInitArguments;
     GSP_SR_INIT_ARGUMENTS             srInitArguments;

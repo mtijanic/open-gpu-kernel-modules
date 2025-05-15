@@ -210,7 +210,7 @@ typedef struct PcieAerCapability
 #define CL_VC_RESOURCE_CTRL_0                       (CL_VC_BEGIN + 0x14)
 #define CL_VC_END                                   (CL_VC_BEGIN + 0x1C)
 
-typedef struct
+typedef struct BUSINFO
 {
     NvU16               deviceID;           // deviceID
     NvU16               vendorID;           // vendorID

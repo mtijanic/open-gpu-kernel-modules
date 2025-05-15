@@ -24,7 +24,7 @@
 #ifndef _ENGINE_INFO_H_
 #define _ENGINE_INFO_H_
 
-typedef enum
+typedef enum ENGINE_INFO_TYPE
 {
     /* *************************************************************************
      * Bug 3820969

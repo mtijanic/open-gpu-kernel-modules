@@ -33,7 +33,7 @@
 
 #include "nvtypes.h"
 
-typedef struct {
+typedef struct RM_RISCV_UCODE_DESC {
     //
     // Version 1
     // Version 2

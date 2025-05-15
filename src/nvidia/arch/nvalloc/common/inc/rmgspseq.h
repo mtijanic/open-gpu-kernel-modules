@@ -101,14 +101,14 @@ typedef enum GSP_SEQ_BUF_OPCODE
     0)
 
 // The size of the structure must be DWord aligned!
-typedef struct
+typedef struct GSP_SEQ_BUF_PAYLOAD_REG_WRITE
 {
     NvU32 addr;
     NvU32 val;
 } GSP_SEQ_BUF_PAYLOAD_REG_WRITE;
 
 // The size of the structure must be DWord aligned!
-typedef struct
+typedef struct GSP_SEQ_BUF_PAYLOAD_REG_MODIFY
 {
     NvU32 addr;
     NvU32 mask;
@@ -116,7 +116,7 @@ typedef struct
 } GSP_SEQ_BUF_PAYLOAD_REG_MODIFY;
 
 // The size of the structure must be DWord aligned!
-typedef struct
+typedef struct GSP_SEQ_BUF_PAYLOAD_REG_POLL
 {
     NvU32 addr;
     NvU32 mask;
@@ -126,13 +126,13 @@ typedef struct
 } GSP_SEQ_BUF_PAYLOAD_REG_POLL;
 
 // The size of the structure must be DWord aligned!
-typedef struct
+typedef struct GSP_SEQ_BUF_PAYLOAD_DELAY_US
 {
     NvU32 val;
 } GSP_SEQ_BUF_PAYLOAD_DELAY_US;
 
 // The size of the structure must be DWord aligned!
-typedef struct
+typedef struct GSP_SEQ_BUF_PAYLOAD_REG_STORE
 {
     NvU32 addr;
     NvU32 index;

@@ -37,7 +37,7 @@
  * Initialized by CPU-RM and kept in Sysmem.
  * Consumed by secure ucode (Booter or ACR_RISCV).
  */
-typedef struct
+typedef struct GspFwSRMeta
 {
     // Magic for verification by secure ucode
     NvU64 magic;  // = GSP_FW_SR_META_MAGIC;

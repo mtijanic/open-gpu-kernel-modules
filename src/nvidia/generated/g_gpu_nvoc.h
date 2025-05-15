@@ -346,7 +346,7 @@ typedef enum
     BRANDING_TYPE_VGX,
 } BRANDING_TYPE;
 
-typedef enum
+typedef enum COMPUTE_BRANDING_TYPE
 {
     COMPUTE_BRANDING_TYPE_NONE,
     COMPUTE_BRANDING_TYPE_TESLA,
@@ -550,7 +550,7 @@ NvU32 gpuGenerate32BitIdFromPhysAddr(RmPhysAddr addr);
 #define INSTMEM_TAG(a)      ((INSTMEM_TAG_MASK & (a)) >> 28)
 
 
-typedef struct
+typedef struct GPUIDINFO
 {
 
     NvU32                 PCIDeviceID;
@@ -562,7 +562,7 @@ typedef struct
 } GPUIDINFO;
 
 
-typedef struct
+typedef struct PMCBOOT0
 {
     NvU32                 impl;
     NvU32                 arch;
@@ -571,7 +571,7 @@ typedef struct
     NvU32                 minorExtRev;
 } PMCBOOT0;
 
-typedef struct
+typedef struct PMCBOOT42
 {
     NvU32                 impl;
     NvU32                 arch;
@@ -583,7 +583,7 @@ typedef struct
 //
 // Random collection of bus-related configuration state.
 //
-typedef struct
+typedef struct GPUBUSINFO
 {
     RmPhysAddr            gpuPhysAddr;
     RmPhysAddr            gpuPhysFbAddr;
@@ -5473,7 +5473,7 @@ ct_assert(NV_REG_BASE_LAST < NV2080_CTRL_INTERNAL_GET_CHIP_INFO_REG_BASE_MAX);
 #define GPU_REG_VALUE_INVALID    0xFFFFFFFF
 
 typedef struct _vgpu_static_info VGPU_STATIC_INFO;
-typedef struct GspStaticConfigInfo_t GspStaticConfigInfo;
+typedef struct GspStaticConfigInfo GspStaticConfigInfo;
 
 // Static info getters
 VGPU_STATIC_INFO *gpuGetStaticInfo(struct OBJGPU *pGpu);

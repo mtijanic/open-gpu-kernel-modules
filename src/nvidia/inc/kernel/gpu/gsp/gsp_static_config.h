@@ -75,7 +75,7 @@ typedef struct
 } FW_WPR_LAYOUT_OFFSET;
 
 // Fetched from GSP-RM into CPU-RM
-typedef struct GspStaticConfigInfo_t
+typedef struct GspStaticConfigInfo
 {
     NvU8 grCapsBits[NV0080_CTRL_GR_CAPS_TBL_SIZE];
     NV2080_CTRL_GPU_GET_GID_INFO_PARAMS gidInfo;

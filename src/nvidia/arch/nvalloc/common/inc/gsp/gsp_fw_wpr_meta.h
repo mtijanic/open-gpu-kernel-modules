@@ -57,7 +57,7 @@
  *   ---------------------------- <- nonWprHeapOffset, gspFwRsvdStart
  *                                   (GSP_CARVEOUT_SIZE bytes from end of FB)
  */
-typedef struct
+typedef struct GspFwWprMeta
 {
     // Magic
     // BL to use for verification (i.e. Booter locked it in WPR2)

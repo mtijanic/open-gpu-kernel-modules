@@ -2480,7 +2480,7 @@ typedef enum
     PB_SIZE_64KB
 } ChannelPBSize;
 
-typedef struct
+typedef struct NV50VAIO_CHANNELDMA_ALLOCATION_PARAMETERS
 {
     NvV32         channelInstance;            // One of the n channel instances of a given channel type.
                                               // Note that core channel has only one instance
@@ -2499,7 +2499,7 @@ typedef struct
     NvU32    subDeviceId;                // One-hot encoded subDeviceId (i.e. SDM) that will be used to address the channel in the pushbuffer stream (via SSDM method)
 } NV50VAIO_CHANNELDMA_ALLOCATION_PARAMETERS;
 
-typedef struct
+typedef struct NV50VAIO_CHANNELPIO_ALLOCATION_PARAMETERS
 {
     NvV32    channelInstance;            // One of the n channel instances of a given channel type.
                                          // All PIO channels have two instances (one per head).
@@ -2508,7 +2508,7 @@ typedef struct
 } NV50VAIO_CHANNELPIO_ALLOCATION_PARAMETERS;
 
 // Used for allocating a channel group
-typedef struct
+typedef struct NV_CHANNEL_GROUP_ALLOCATION_PARAMETERS
 {
     NvHandle hObjectError;               // Error notifier for TSG
     NvHandle hObjectEccError;            // ECC Error notifier for TSG
@@ -2528,7 +2528,7 @@ typedef struct
 *                     sizeof(RunlistEntry) // Determined by HW format
 * @qosIntrEnableMask: QOS Interrupt bitmask that needs to be enabled for the SW runlist defined below.
 */
-typedef struct
+typedef struct NV_SWRUNLIST_ALLOCATION_PARAMS
 {
     NvU32    engineId;          //(IN)
     NvU32    maxTSGs;           //(IN)  // Size of the RM could return error if the request cannot be accommodated.
@@ -2541,13 +2541,13 @@ typedef struct
 #define NV_SWRUNLIST_QOS_INTR_RUNLIST_ACQUIRE_ENABLE                 NVBIT32(2)
 #define NV_SWRUNLIST_QOS_INTR_RUNLIST_ACQUIRE_AND_ENG_IDLE_ENABLE    NVBIT32(3)
 
-typedef struct
+typedef struct NV_ME_ALLOCATION_PARAMETERS
 {
     NvU32 size;
     NvU32 caps;
 } NV_ME_ALLOCATION_PARAMETERS;
 
-typedef struct
+typedef struct NV_BSP_ALLOCATION_PARAMETERS
 {
     NvU32 size;
     NvU32 prohibitMultipleInstances;
@@ -2571,7 +2571,7 @@ typedef struct
 #define  NV_VP_ALLOCATION_FLAGS_AVP_CLIENT_VIDEO            (0x00000000)
 #define  NV_VP_ALLOCATION_FLAGS_AVP_CLIENT_AUDIO            (0x00000001)
 
-typedef struct
+typedef struct NV_VP_ALLOCATION_PARAMETERS
 {
     NvU32       size;
     NvU32       caps;
@@ -2589,33 +2589,33 @@ typedef struct
 
 } NV_VP_ALLOCATION_PARAMETERS;
 
-typedef struct
+typedef struct NV_PPP_ALLOCATION_PARAMETERS
 {
     NvU32 size;
     NvU32 prohibitMultipleInstances;
 } NV_PPP_ALLOCATION_PARAMETERS;
 
-typedef struct
+typedef struct NV_MSENC_ALLOCATION_PARAMETERS
 {
     NvU32 size;
     NvU32 prohibitMultipleInstances;  // Prohibit multiple allocations of MSENC?
     NvU32 engineInstance;             // Select MSENC/NVENC0 or NVENC1 or NVENC2
 } NV_MSENC_ALLOCATION_PARAMETERS;
 
-typedef struct
+typedef struct NV_SEC2_ALLOCATION_PARAMETERS
 {
     NvU32 size;
     NvU32 prohibitMultipleInstances;  // Prohibit multiple allocations of SEC2?
 } NV_SEC2_ALLOCATION_PARAMETERS;
 
-typedef struct
+typedef struct NV_NVJPG_ALLOCATION_PARAMETERS
 {
     NvU32 size;
     NvU32 prohibitMultipleInstances;  // Prohibit multiple allocations of NVJPG?
     NvU32 engineInstance;
 } NV_NVJPG_ALLOCATION_PARAMETERS;
 
-typedef struct
+typedef struct NV_OFA_ALLOCATION_PARAMETERS
 {
     NvU32 size;
     NvU32 prohibitMultipleInstances;  // Prohibit multiple allocations of OFA?
@@ -2755,7 +2755,7 @@ typedef struct
  *       If the big page size value is set to ZERO then we will pick the default page size
  *       of the system.
  **/
-typedef struct
+typedef struct NV_VASPACE_ALLOCATION_PARAMETERS
 {
     NvU32   index;
     NvV32   flags;

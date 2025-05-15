@@ -46,7 +46,7 @@
  */
 
 // buffer metadata, written by source, at start of block
-typedef struct
+typedef struct msgqTxHeader
 {
     NvU32 version;   // queue version
     NvU32 size;      // bytes, page aligned
@@ -59,13 +59,13 @@ typedef struct
 } msgqTxHeader;
 
 // buffer metadata, written by sink
-typedef struct
+typedef struct msgqRxHeader
 {
     NvU32 readPtr; // message id of last message read
 } msgqRxHeader;
 
 // Internal tracking structure (handle)
-typedef struct
+typedef struct msgqMetadata
 {
     // Those are also bases of buffers; our / their means belonging to our/their buffer
     msgqTxHeader                *pOurTxHdr;

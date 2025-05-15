@@ -101,7 +101,7 @@ typedef struct UserInfo UserInfo;
  * #NV_CHANNEL_ALLOC_PARAMS.errorNotifierMem and
  * #NV_CHANNEL_ALLOC_PARAMS.eccErrorNotifierMem.
  */
-typedef enum {
+typedef enum ErrorNotifierType {
     /*!
      * Initial state as passed in NV_CHANNEL_ALLOC_PARAMS by
      * kernel CPU-RM clients.

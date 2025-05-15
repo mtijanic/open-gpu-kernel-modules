@@ -5,7 +5,7 @@
 #ifndef X
 #    define X(UNIT, RPC, VAL) NV_VGPU_MSG_FUNCTION_##RPC = VAL,
 #    define DEFINING_X_IN_RPC_GLOBAL_ENUMS_H
-enum {
+enum NV_VGPU_MSG_FUNCTION {
 #endif
     X(RM, NOP,                                                    0)
     X(RM, SET_GUEST_SYSTEM_INFO,                                  1)
@@ -245,7 +245,7 @@ enum {
 #ifndef E
 #    define E(RPC, VAL) NV_VGPU_MSG_EVENT_##RPC = VAL,
 #    define DEFINING_E_IN_RPC_GLOBAL_ENUMS_H
-enum {
+enum NV_VGPU_MSG_EVENT {
 #endif
     E(FIRST_EVENT,                                            0x1000)
     E(GSP_INIT_DONE,                                          0x1001)

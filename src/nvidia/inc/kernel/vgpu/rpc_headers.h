@@ -220,7 +220,7 @@ typedef enum
 /*
  * Enums specifying the BAR number that we are going to update its PDE
  */
-typedef enum
+typedef enum NV_RPC_UPDATE_PDE_BAR_TYPE
 {
     NV_RPC_UPDATE_PDE_BAR_1,
     NV_RPC_UPDATE_PDE_BAR_2,

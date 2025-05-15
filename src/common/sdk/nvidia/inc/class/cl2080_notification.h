@@ -486,7 +486,7 @@ typedef struct Nv2080WorkloadModulationChangeNotificationRec {
 } Nv2080WorkloadModulationChangeNotification;
 
 /* Hotplug notification information */
-typedef struct {
+typedef struct Nv2080HotplugNotification {
     NvU32 plugDisplayMask;
     NvU32 unplugDisplayMask;
 } Nv2080HotplugNotification;
@@ -499,7 +499,7 @@ typedef struct {
 } Nv2080PowerEventNotification;
 
 /* DP IRQ notification information */
-typedef struct Nv2080DpIrqNotificationRec {
+typedef struct Nv2080DpIrqNotification {
     NvU32 displayId;
 } Nv2080DpIrqNotification;
 

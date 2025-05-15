@@ -32,13 +32,13 @@
 
 typedef NvU64 LibosAddress;
 
-typedef enum {
+typedef enum LibosMemoryRegionKind {
     LIBOS_MEMORY_REGION_NONE,
     LIBOS_MEMORY_REGION_CONTIGUOUS,
     LIBOS_MEMORY_REGION_RADIX3
 } LibosMemoryRegionKind;
 
-typedef enum {
+typedef enum LibosMemoryRegionLoc {
     LIBOS_MEMORY_REGION_LOC_NONE,
     LIBOS_MEMORY_REGION_LOC_SYSMEM,
     LIBOS_MEMORY_REGION_LOC_FB
@@ -46,7 +46,7 @@ typedef enum {
 
 #define LIBOS_MEMORY_REGION_RADIX_PAGE_SIZE 4096
 #define LIBOS_MEMORY_REGION_RADIX_PAGE_LOG2 12
-typedef struct
+typedef struct LibosMemoryRegionInitArgument
 {
     LibosAddress          id8;  // Id tag.
     LibosAddress          pa;   // Physical address.
